@@ -1,93 +1,181 @@
-import { useEffect, useState, useRef } from "react";
-import {BrowserRouter, Routes, Route, Link,} from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { FaHome, FaHeart } from "react-icons/fa";
+
 import MovieCard from "./components/MovieCard";
 import SearchBar from "./components/SearchBar";
 import Favorites from "./pages/Favorites";
-import { getPopularMovies, searchMovies,} from "./services/tmdb";
-import { FaHome, FaHeart } from "react-icons/fa";
+
+import {
+  getPopularMovies,
+  searchMovies,
+} from "./services/tmdb";
+
+import useDebounce from "./hooks/useDebounce";
+
 function App() {
   const [movies, setMovies] = useState([]);
-  const [page, setPage] = useState(1);
-  const observerRef = useRef();
+
   const [favorites, setFavorites] = useState(() => {
     const saved = localStorage.getItem("favorites");
     return saved ? JSON.parse(saved) : [];
   });
-  const loadMovies = async (pageNumber) => {
-    try {
-      const data = await getPopularMovies(pageNumber);
-      setMovies((prev) => [
-        ...prev,
-        ...data.results,
-      ]);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  useEffect(() => {
-    loadMovies(page);
-  }, [page]);
+
+  const [searchTerm, setSearchTerm] =
+    useState("");
+
+  const debouncedSearch =
+    useDebounce(searchTerm, 500);
+
+  const [page, setPage] = useState(1);
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [isSearching, setIsSearching] =
+    useState(false);
+
+  const observerRef = useRef(null);
+
+  const loadMovies = async () => {
+  try {
+    setLoading(true);
+
+    const data = await getPopularMovies();
+
+    console.log("Movies received:", data);
+
+    setMovies(data);
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setLoading(false);
+  }
+};
+
   useEffect(() => {
     localStorage.setItem(
       "favorites",
       JSON.stringify(favorites)
     );
   }, [favorites]);
+
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          setPage((prev) => prev + 1);
-        }
-      },
-      {
-        threshold: 1,
+    if (isSearching) return;
+
+    loadMovies(page);
+  }, [page, isSearching]);
+
+  useEffect(() => {
+    const fetchSearch = async () => {
+      if (!debouncedSearch.trim()) {
+        setMovies([]);
+        setPage(1);
+        setIsSearching(false);
+        return;
       }
-    );
-    if (observerRef.current) {
-      observer.observe(observerRef.current);
+
+      try {
+        setIsSearching(true);
+
+        const data =
+          await searchMovies(
+            debouncedSearch
+          );
+
+        setMovies(data.results || []);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchSearch();
+  }, [debouncedSearch]);
+
+  useEffect(() => {
+    const observer =
+      new IntersectionObserver(
+        (entries) => {
+          if (
+            entries[0].isIntersecting &&
+            !loading &&
+            !isSearching &&
+            movies.length > 0
+          ) {
+            setPage((prev) => prev + 1);
+          }
+        },
+        {
+          threshold: 0.1,
+        }
+      );
+
+    const current = observerRef.current;
+
+    if (current) {
+      observer.observe(current);
     }
-    return () => observer.disconnect();
-  }, []);
-  const handleSearch = async (query) => {
-    if (!query.trim()) return;
-    try {
-      const data = await searchMovies(query);
-      setMovies(data.results);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+
+    return () => {
+      if (current) {
+        observer.unobserve(current);
+      }
+    };
+  }, [loading, isSearching, movies]);
+
   const toggleFavorite = (movie) => {
-    const exists = favorites.find(
+    const exists = favorites.some(
       (fav) => fav.id === movie.id
     );
+
     if (exists) {
-      setFavorites(
-        favorites.filter(
+      setFavorites((prev) =>
+        prev.filter(
           (fav) => fav.id !== movie.id
         )
       );
     } else {
-      setFavorites([...favorites, movie]);
+      setFavorites((prev) => [
+        ...prev,
+        movie,
+      ]);
     }
   };
+
   return (
     <BrowserRouter>
       <div className="container">
         <nav className="navbar">
-          <div className="nav-left">
-            <Link to="/"><FaHome /> Home</Link>
-            <Link to="/favorites"><FaHeart />Favorites ({favorites.length})</Link>
+          <div className="nav-links">
+            <Link to="/">
+              <FaHome />
+              Home
+            </Link>
+
+            <Link to="/favorites">
+              <FaHeart />
+              Favorites (
+              {favorites.length})
+            </Link>
           </div>
         </nav>
+
         <Routes>
           <Route
             path="/"
             element={
               <>
-                <h1>🎬 CineStream</h1>
-                <SearchBar onSearch={handleSearch}/>
+                <h1 className="app-title">
+                  🎬 CineStream
+                </h1>
+
+                <SearchBar
+                  searchTerm={searchTerm}
+                  setSearchTerm={
+                    setSearchTerm
+                  }
+                />
+
                 <div className="movie-grid">
                   {movies.map((movie) => (
                     <MovieCard
@@ -103,14 +191,35 @@ function App() {
                     />
                   ))}
                 </div>
-                <div ref={observerRef} style={{ height: "20px", }}></div>
+
+                {loading && (
+                  <h3
+                    style={{
+                      textAlign: "center",
+                    }}
+                  >
+                    Loading...
+                  </h3>
+                )}
+
+                {!isSearching && (
+                  <div
+                    ref={observerRef}
+                    style={{
+                      height: "50px",
+                    }}
+                  />
+                )}
               </>
             }
           />
+
           <Route
             path="/favorites"
             element={
-              <Favorites favorites={favorites} />
+              <Favorites
+                favorites={favorites}
+              />
             }
           />
         </Routes>
@@ -118,4 +227,5 @@ function App() {
     </BrowserRouter>
   );
 }
+
 export default App;
