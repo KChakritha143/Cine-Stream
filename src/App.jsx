@@ -21,37 +21,43 @@ function App() {
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [searchTerm, setSearchTerm] =
-    useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const debouncedSearch =
-    useDebounce(searchTerm, 500);
+  const debouncedSearch = useDebounce(
+    searchTerm,
+    500
+  );
 
   const [page, setPage] = useState(1);
 
-  const [loading, setLoading] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [isSearching, setIsSearching] =
     useState(false);
 
   const observerRef = useRef(null);
 
-  const loadMovies = async () => {
-  try {
-    setLoading(true);
+  const loadMovies = async (pageNum = 1) => {
+    try {
+      setLoading(true);
 
-    const data = await getPopularMovies();
+      const data =
+        await getPopularMovies(pageNum);
 
-    console.log("Movies received:", data);
-
-    setMovies(data);
-  } catch (error) {
-    console.error(error);
-  } finally {
-    setLoading(false);
-  }
-};
+      setMovies((prev) =>
+        pageNum === 1
+          ? data.results
+          : [...prev, ...data.results]
+      );
+    } catch (error) {
+      console.error(
+        "Movie Loading Error:",
+        error
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     localStorage.setItem(
@@ -61,21 +67,22 @@ function App() {
   }, [favorites]);
 
   useEffect(() => {
-    if (isSearching) return;
-
-    loadMovies(page);
+    if (!isSearching) {
+      loadMovies(page);
+    }
   }, [page, isSearching]);
 
   useEffect(() => {
     const fetchSearch = async () => {
       if (!debouncedSearch.trim()) {
-        setMovies([]);
-        setPage(1);
         setIsSearching(false);
+        setPage(1);
+        loadMovies(1);
         return;
       }
 
       try {
+        setLoading(true);
         setIsSearching(true);
 
         const data =
@@ -85,7 +92,12 @@ function App() {
 
         setMovies(data.results || []);
       } catch (error) {
-        console.error(error);
+        console.error(
+          "Search Error:",
+          error
+        );
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -99,8 +111,7 @@ function App() {
           if (
             entries[0].isIntersecting &&
             !loading &&
-            !isSearching &&
-            movies.length > 0
+            !isSearching
           ) {
             setPage((prev) => prev + 1);
           }
@@ -121,7 +132,7 @@ function App() {
         observer.unobserve(current);
       }
     };
-  }, [loading, isSearching, movies]);
+  }, [loading, isSearching]);
 
   const toggleFavorite = (movie) => {
     const exists = favorites.some(
@@ -196,9 +207,10 @@ function App() {
                   <h3
                     style={{
                       textAlign: "center",
+                      marginTop: "20px",
                     }}
                   >
-                    Loading...
+                    Loading Movies...
                   </h3>
                 )}
 

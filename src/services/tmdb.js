@@ -4,23 +4,16 @@ console.log("API KEY =", API_KEY);
 const BASE_URL =
   "https://api.themoviedb.org/3";
 
-export const getPopularMovies = async () => {
-  try {
-    const response = await fetch(
-      `${BASE_URL}/movie/popular?api_key=${API_KEY}&page=1`
-    );
+export const getPopularMovies = async (
+  page = 1
+) => {
+  const response = await fetch(
+    `${BASE_URL}/movie/popular?api_key=${API_KEY}&page=${page}`
+  );
 
-    console.log("Response Status:", response.status);
+  const data = await response.json();
 
-    const data = await response.json();
-
-    console.log("TMDB Data:", data);
-
-    return data.results;
-  } catch (error) {
-    console.error("TMDB Error:", error);
-    throw error;
-  }
+  return data;
 };
 
 export const searchMovies = async (
