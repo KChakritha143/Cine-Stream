@@ -166,7 +166,7 @@ Favorites are stored using Local Storage.
 ---
 
 ## Live URL
-cine-stream-19zy-hkipi3yep-kchakritha143s-projects.vercel.app
+https://cine-stream-seven-gold.vercel.app/
 
 ## Future Improvements
 
