@@ -52,24 +52,28 @@ cine-stream/
 │
 ├── src/
 │   ├── components/
+│   │   ├── Navbar.jsx
 │   │   ├── MovieCard.jsx
-│   │   └── SearchBar.jsx
-│   │
-│   ├── hooks/
-│   │   └── useDebounce.js
+│   │   ├── SearchBar.jsx
+│   │   └── Loader.jsx
 │   │
 │   ├── pages/
+│   │   ├── Home.jsx
 │   │   └── Favorites.jsx
 │   │
 │   ├── services/
 │   │   └── tmdb.js
 │   │
+│   ├── hooks/
+│   │   └── useDebounce.js
+│   │
+│   ├── context/
+│   │   └── FavoritesContext.jsx
+│   │
 │   ├── App.jsx
-│   ├── main.jsx
-│   └── index.css
+│   └── main.jsx
 │
 ├── .env
-├── package.json
 ├── README.md
 └── Prompts.md
 ```
