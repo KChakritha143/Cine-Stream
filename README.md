@@ -1,10 +1,10 @@
-# 🎬 CineStream
+# CineStream
 
 CineStream is a modern movie discovery web application built with React and Vite. It allows users to browse popular movies, search for movies, save favorites, and experience seamless infinite scrolling powered by The Movie Database (TMDB) API.
 
 ---
 
-## 🚀 Features
+## Features
 
 ### Phase 1 Features
 
@@ -25,7 +25,7 @@ CineStream is a modern movie discovery web application built with React and Vite
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend
 
@@ -45,7 +45,7 @@ CineStream is a modern movie discovery web application built with React and Vite
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 cine-stream/
@@ -80,7 +80,7 @@ cine-stream/
 
 ---
 
-## ⚙️ Installation
+## Installation
 
 ### Clone Repository
 
@@ -111,7 +111,7 @@ npm run dev
 
 ---
 
-## 🔑 TMDB API Setup
+## TMDB API Setup
 
 1. Create a TMDB account.
 2. Generate an API Key.
@@ -120,7 +120,7 @@ npm run dev
 
 ---
 
-## 🧠 Performance Optimizations
+## Performance Optimizations
 
 ### Infinite Scroll
 
@@ -136,7 +136,7 @@ Movie poster images use native browser lazy loading to improve page performance 
 
 ---
 
-## ❤️ Favorites System
+## Favorites System
 
 Users can:
 
@@ -149,7 +149,7 @@ Favorites are stored using Local Storage.
 
 ---
 
-## 📸 Screenshots
+## Screenshots
 
 ### Home Page
 <img width="1919" height="1132" alt="Screenshot 2026-05-31 194928" src="https://github.com/user-attachments/assets/e0af30d1-450f-4bbe-9e37-0cb415771dcd" />
@@ -165,7 +165,10 @@ Favorites are stored using Local Storage.
 
 ---
 
-## 🔮 Future Improvements
+## Live URL
+cine-stream-19zy-hkipi3yep-kchakritha143s-projects.vercel.app
+
+## Future Improvements
 
 * AI Mood-Based Movie Recommendations
 * Movie Details Page
